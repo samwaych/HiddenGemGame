@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.8.0/Tone.min.js"></script>
+        <title>Find the Gem</title>
+        <style>
+            .container-fluid {
+                margin-top: 25px;;
+            }
+
+            td {
+                font-weight: bold;
+                width: 50px;
+                height: 50px;
+                text-align: center;
+            }
+
+            table {
+                border-collapse: separate;
+                border-spacing: 1px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            table, td {
+                border: 2px solid black;
+            }
+
+            #input {
+                max-width: 140px;
+            }
+
+            .highlight {
+                background-color: gold;
+            }
+
+            .wrong {
+                background-color: red;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <div class="container-fluid text-center">
+            <div class="display-4">Find the Gem</div><br>
+            <div id="table"></div><br>
+            <p id="feedback"></p>
+            <p>Click a square to guess where the gem is hidden, or choose the size of the game grid.</p>
+            <p id="instr"></p>
+            <input type="number" id="input" min="2" placeholder="game grid size"></input> <button class="btn btn-primary" id="submit">Submit</button> <button type="reset" class="btn btn-secondary" id="clear">Reset</button>
+        </div>
+
+    </body>
+
+    <script type="text/javascript">
+
+    window.onload = gameSetup;
+
+    document.getElementById("submit").addEventListener("click", tSize);
+    document.getElementById("clear").addEventListener("click", reset);
+    
+    var numCells = 4;
+    var max;
+    var min = 1;
+    var userSelect;
+    var gemLoc;
+    var enabled = true;
+    var guessLimit;
+    var msg;
+    var audio;
+    
+    //Select random square to hold gem
+    function gameSetup () {
+        enabled = true;
+        setMax();
+        gemLoc = Math.floor(Math.random() * (max - min + 1) + min);
+        console.log(gemLoc);
+        buildTable(numCells);
+        guessLimit = Math.ceil(max * .5);
+        document.getElementById("feedback").innerHTML = "";
+        document.getElementById("instr").innerHTML = "You have <b>" + guessLimit + "</b> guess(es) remaining."
+    }
+
+    function guessCountdown() {
+        guessLimit--;
+        document.getElementById("instr").innerHTML = "You have <b>" + guessLimit + "</b> guess(es) remaining."
+    }
+
+    function buildTable (num) {
+        let table = "<table>";
+        let cellId = 1;
+
+        for(i=0; i<num; i++) {
+            table += "<tr>"
+
+                for(j=0; j<num; j++) {
+                    table += "<td id=" + cellId +" onclick='getId(this.id)'></td>";
+                    cellId ++;
+                }
+
+            table += "</tr>"
+        }
+
+        table += "</table>"
+
+        document.getElementById("table").innerHTML = table;
+    }
+
+    function setMax() {
+        max = numCells * numCells;
+    }
+
+    function tSize() {
+        numCells = document.getElementById("input").value;
+        audio.pause();
+
+        if (numCells < 2) {
+            msg = "Please input a number 2 or greater before clicking submit."
+            document.getElementById("feedback").innerHTML = "<b>" + msg + "</b>";
+        }
+
+        else {
+            setMax();
+            console.log(numCells);
+            gameSetup();
+            document.getElementById("input").value = "";
+            enabled = true;
+            document.getElementById("feedback").classList.remove("highlight");
+        }
+    }
+
+    function getId(id) {
+        userSelect = id;
+        uInput();
+    }
+
+    //Get user input and determine if it matches gem location
+    function uInput() {
+        
+        if(enabled == true) {
+            audio = new Audio('PloppyPlop.wav');
+            audio.play();
+            if (guessLimit > 1) {
+                if(userSelect != gemLoc) {
+                    wrong();
+                    guessCountdown();
+                    msg = "Try again!!";
+                }
+                
+                else {
+                    win();
+                }
+            }
+
+            else  {
+                if(userSelect == gemLoc) {
+                    win();
+                }
+
+                else {
+                wrong();
+                audio = new Audio('DistantStargate.wav');
+                audio.play();
+                msg = "Sorry, You lose!"
+                guessCountdown()
+                enabled = false;
+                }
+            }
+
+            document.getElementById("feedback").innerHTML = "<b>" + msg + "</b>";
+        }
+    }
+
+    function win () {
+        audio = new Audio('SeeTheLight.wav');
+        audio.play();
+        document.getElementById(userSelect).innerHTML = "O";
+        document.getElementById(userSelect).className = "highlight";
+        msg = "Congrats, You have successfully found the hidden gem!"
+        document.getElementById("feedback").className = "highlight";
+        guessCountdown()
+        enabled = false;
+    }
+
+    function wrong () {
+        document.getElementById(userSelect).innerHTML = "X";
+        document.getElementById(userSelect).className = "wrong";
+    }
+
+    function reset () {
+        audio.pause();
+        for(i=1; i < max; i++) {
+            document.getElementById(i).innerHTML = "";
+        }
+
+        document.getElementById("feedback").classList.remove("highlight");
+        document.getElementById("feedback").innerHTML = "";
+        document.getElementById("input").value = "";
+        numCells = 4;
+        gameSetup();
+    }
+
+    </script>
+
+</html>
