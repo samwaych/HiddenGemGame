@@ -149,7 +149,7 @@
         if(enabled == true) {
             if (guessLimit > 1) {
                 if(userSelect != gemLoc) {
-                    audio = new Audio('boop.mp4');
+                    audio = new Audio('Short - Ploppy Plop.wav');
                     audio.play();
                     wrong();
                     guessCountdown();
@@ -168,7 +168,7 @@
 
                 else {
                 wrong();
-                audio = new Audio('lose.mp4');
+                audio = new Audio('Drone - Ocean Cave.wav');
                 audio.play();
                 msg = "Sorry, You lose!"
                 guessCountdown()
@@ -181,7 +181,7 @@
     }
 
     function win () {
-        audio = new Audio('win.mp4');
+        audio = new Audio('Drone - Crystal Cave.wav');
         audio.play();
         document.getElementById(userSelect).innerHTML = "O";
         document.getElementById(userSelect).className = "highlight";
