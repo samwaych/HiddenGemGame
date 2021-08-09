@@ -145,19 +145,23 @@
 
     //Get user input and determine if it matches gem location
     function uInput() {
+
+        let selected = document.getElementById(userSelect).innerHTML
         
         if(enabled == true) {
             if (guessLimit > 1) {
-                if(userSelect != gemLoc) {
-                    audio = new Audio('Short - Ploppy Plop.wav');
-                    audio.play();
-                    wrong();
-                    guessCountdown();
-                    msg = "Try again!!";
-                }
-                
-                else {
-                    win();
+                if (selected == '') {
+                    if(userSelect != gemLoc) {
+                        audio = new Audio('Short - Ploppy Plop.wav');
+                        audio.play();
+                        wrong();
+                        guessCountdown();
+                        msg = "Try again!!";
+                    }
+                    
+                    else {
+                        win();
+                    }
                 }
             }
 
